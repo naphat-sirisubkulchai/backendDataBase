@@ -14,7 +14,9 @@ const corsOptions = {
 // app.use(cors());
 app.use(cors(corsOptions));
 app.use(express.json())
-app.get("/", (req, res) => res.send("Express on Vercel"));
+app.get("/", (req, res) => {
+  res.send("Express on Vercel");
+});
 //////////////////////// user/////////////////////////////////////
 app.get('/users', async (req, res) => {
   try {

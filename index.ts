@@ -7,14 +7,16 @@ const app = express()
 const prisma = new PrismaClient()
 // Allow requests from specific origins
 const corsOptions = {
-  origin: ['database-gatang-and-gan-g.vercel.app'],
+  origin: ['database-gatang-and-gan-g.vercel.app','http://localhost:3000'],
   credentials: true // Enable CORS credentials
 };
 
 // app.use(cors());
 app.use(cors(corsOptions));
 app.use(express.json())
-app.get("/", (req, res) => res.send("Express on Vercel"));
+app.get("/", (req, res) => {
+  res.send("Express on Vercel");
+});
 //////////////////////// user/////////////////////////////////////
 
 app.delete('/user/delete/:email', async (req, res) => {
@@ -602,4 +604,4 @@ app.get('/categories/:slug/products', async (req, res) => {
       res.status(500).json({ error: 'An error occurred while deleting the store.' });
     }
   });
-app.listen(3000, () => console.log("Server ready on port 5050 or http://localhost:3000."));
+app.listen(5050, () => console.log("Server ready on port 5050 or http://localhost:5050."));
