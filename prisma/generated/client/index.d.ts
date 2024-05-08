@@ -301,7 +301,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 5.12.1
-   * Query Engine version: 473ed3124229e22d881cb7addf559799debae1ab
+   * Query Engine version: b9a39a7ee606c28e3455d0fd60e78c3ba82b1a2b
    */
   export type PrismaVersion = {
     client: string
@@ -8271,7 +8271,7 @@ export namespace Prisma {
   }
 
   export type StoreCreateInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     createdAt?: Date | string
@@ -8282,7 +8282,7 @@ export namespace Prisma {
   }
 
   export type StoreUncheckedCreateInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     userId: string
@@ -8315,7 +8315,7 @@ export namespace Prisma {
   }
 
   export type StoreCreateManyInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     userId: string
@@ -9431,7 +9431,7 @@ export namespace Prisma {
   }
 
   export type StoreCreateWithoutProductInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     createdAt?: Date | string
@@ -9441,7 +9441,7 @@ export namespace Prisma {
   }
 
   export type StoreUncheckedCreateWithoutProductInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     userId: string
@@ -9729,7 +9729,7 @@ export namespace Prisma {
   }
 
   export type StoreCreateWithoutOrderItemInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     createdAt?: Date | string
@@ -9739,7 +9739,7 @@ export namespace Prisma {
   }
 
   export type StoreUncheckedCreateWithoutOrderItemInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     userId: string
@@ -9853,7 +9853,7 @@ export namespace Prisma {
   }
 
   export type StoreCreateWithoutUserInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     createdAt?: Date | string
@@ -9863,7 +9863,7 @@ export namespace Prisma {
   }
 
   export type StoreUncheckedCreateWithoutUserInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     createdAt?: Date | string
@@ -10222,7 +10222,7 @@ export namespace Prisma {
   }
 
   export type StoreCreateManyUserInput = {
-    id: string
+    id?: string
     name: string
     description?: string | null
     createdAt?: Date | string

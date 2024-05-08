@@ -16,6 +16,7 @@ app.use(cors(corsOptions));
 app.use(express.json())
 app.get("/", (req, res) => res.send("Express on Vercel"));
 //////////////////////// user/////////////////////////////////////
+
 app.delete('/user/delete/:email', async (req, res) => {
     try {
       let { email } = req.params;
@@ -32,6 +33,23 @@ app.delete('/user/delete/:email', async (req, res) => {
     }
   });
 app.get('/user/:email', async (req, res) => {
+try {
+    const { email } = req.params;
+
+    // Use Prisma to query the database
+    const user = await prisma.user.findUnique({
+    where: { email},
+    }); 
+
+    if (!user) {
+    return res.status(404).json({ error: 'user not found' });
+    }
+    res.json(user);
+} catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+}
+});app.get('/user/:email', async (req, res) => {
 try {
     const { email } = req.params;
 
@@ -416,21 +434,7 @@ app.get('/orders/all', async (req, res) => {
       res.status(500).json({ error: 'An error occurred while creating the category.' });
     }
   });
-  app.post('/categories/post_many', async (req, res) => {
-    try {
-      const { slug, name } = req.body;
-      const newCategory = await prisma.category.create({
-        data: {
-          slug,
-          name
-        }
-      });
-      res.json(newCategory);
-    } catch (error) {
-      console.error('Error creating category:', error);
-      res.status(500).json({ error: 'An error occurred while creating the category.' });
-    }
-  });
+  
   app.get('/categories/all', async (req, res) => {
     try {
       const categories = await prisma.category.findMany();
@@ -499,7 +503,103 @@ app.get('/categories/:slug/products', async (req, res) => {
       res.status(500).json({ error: 'An error occurred while fetching category and its products.' });
     }
   });
+   //////////////////////// Store/////////////////////////////////////
+   app.post('/stores/post', async (req, res) => {
+    try {
+      const { name, description, userId } = req.body;
   
+      // Ensure userId is a string
+      if (typeof userId !== 'string') {
+        return res.status(400).json({ error: 'Invalid userId.' });
+      }
   
+      const newStore = await prisma.store.create({
+        data: {
+          name,
+          description,
+          userId
+        }
+      });
+      res.json(newStore);
+    } catch (error) {
+      console.error('Error creating store:', error);
+      res.status(500).json({ error: 'An error occurred while creating the store.' });
+    }
+  });
+  
+  // Get All Stores
+  app.get('/stores/all', async (req, res) => {
+    try {
+      const stores = await prisma.store.findMany();
+      res.json(stores);
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+      res.status(500).json({ error: 'An error occurred while fetching stores.' });
+    }
+  });
+  
+  // Get Store by ID
+  app.get('/stores/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const store = await prisma.store.findUnique({
+        where: { id }
+      });
+      if (!store) {
+        return res.status(404).json({ error: 'Store not found.' });
+      }
+      res.json(store);
+    } catch (error) {
+      console.error('Error fetching store:', error);
+      res.status(500).json({ error: 'An error occurred while fetching the store.' });
+    }
+  });
 
-app.listen(5050, () => console.log("Server ready on port 5050 or http://localhost:5050."))
+  app.get('/stores/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+  
+      // Retrieve stores associated with the provided user ID
+      const stores = await prisma.store.findMany({
+        where: {
+          userId
+        }
+      });
+  
+      res.json(stores);
+    } catch (error) {
+      console.error('Error fetching stores:', error);
+      res.status(500).json({ error: 'An error occurred while fetching stores.' });
+    }
+  });
+  
+  // Update Store
+  app.put('/stores/put/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, description } = req.body;
+      const updatedStore = await prisma.store.update({
+        where: { id },
+        data: { name, description }
+      });
+      res.json(updatedStore);
+    } catch (error) {
+      console.error('Error updating store:', error);
+      res.status(500).json({ error: 'An error occurred while updating the store.' });
+    }
+  });
+  
+  // Delete Store
+  app.delete('/stores/delete/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await prisma.store.delete({
+        where: { id }
+      });
+      res.json({ message: 'Store deleted successfully.' });
+    } catch (error) {
+      console.error('Error deleting store:', error);
+      res.status(500).json({ error: 'An error occurred while deleting the store.' });
+    }
+  });
+app.listen(3000, () => console.log("Server ready on port 5050 or http://localhost:3000."));
