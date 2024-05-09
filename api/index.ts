@@ -5,7 +5,7 @@ import cors from 'cors';
 const app = express()
 const prisma = new PrismaClient()
 const corsOptions = {
-  origin: ['database-gatang-and-gan-g.vercel.app','http://localhost:3000','http://localhost:3001','http://localhost:3002','http://localhost:3003','http://localhost:3004'],
+  origin: ['http://database-gatang-and-gan-g.vercel.app','database-gatang-and-gan-g.vercel.app','http://localhost:3000','http://localhost:3001','http://localhost:3002','http://localhost:3003','http://localhost:3004'],
   credentials: true 
 };
 
@@ -90,6 +90,28 @@ app.get('/products/:productId', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  app.get('/products/bystore/:storeId', async (req, res) => {
+    try {
+      const storeId = req.params.storeId;
+  
+
+      const product = await prisma.product.findUnique({
+        where: { id: storeId },
+        include: { Store: true, Category: true, orderItems: true }, 
+      });
+  
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+  
+      res.json(product);
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   app.post('/products/post', async (req, res) => {
     try {
       const { name, slug, description, price, images, storeId, categoryId } = req.body;
