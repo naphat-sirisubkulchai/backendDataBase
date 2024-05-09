@@ -486,6 +486,52 @@ app.get('/orders/all', async (req, res) => {
     }
   });
 
+  app.delete('/order-items/delete2/:orderItemId', async (req, res) => {
+    try {
+        const { orderItemId } = req.params;
+
+        // Find the order item to be deleted and include the associated product information
+        const orderItem = await prisma.orderItem.findUnique({
+            where: {
+                id: orderItemId
+            },
+            include: {
+                product: true,
+                order: true
+            }
+        });
+
+        if (!orderItem) {
+            return res.status(404).json({ error: 'Order item not found' });
+        }
+
+        // Delete the order item
+        await prisma.orderItem.delete({
+            where: {
+                id: orderItemId
+            }
+        });
+
+        // Decrease the total price of the order by subtracting the price of the deleted product
+        await prisma.order.update({
+            where: {
+                id: orderItem.orderId // Use the orderId from the fetched order item
+            },
+            data: {
+                totalPrice: {
+                    decrement: orderItem.product.price // Decrement the total price by the price of the deleted product
+                }
+            }
+        });
+
+        res.status(200).json({ message: 'Order item deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting order item:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the order item.' });
+    }
+});
+
+
   app.get('/order-items/:id', async (req, res) => {
     try {
 

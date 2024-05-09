@@ -5,7 +5,7 @@ import cors from 'cors';
 const app = express()
 const prisma = new PrismaClient()
 const corsOptions = {
-  origin: ['database-gatang-and-gan-g.vercel.app','http://localhost:3000'],
+  origin: ['database-gatang-and-gan-g.vercel.app','http://localhost:3000','http://localhost:3001','http://localhost:3002','http://localhost:3003','http://localhost:3004'],
   credentials: true 
 };
 
@@ -485,6 +485,52 @@ app.get('/orders/all', async (req, res) => {
       res.status(500).json({ error: 'An error occurred while deleting the order item.' });
     }
   });
+
+  app.delete('/order-items/delete2/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Find the order item to be deleted and include the associated product information
+        const orderItem = await prisma.orderItem.findUnique({
+            where: {
+                id: id
+            },
+            include: {
+                product: true,
+                order: true
+            }
+        });
+
+        if (!orderItem) {
+            return res.status(404).json({ error: 'Order item not found' });
+        }
+
+        // Delete the order item
+        await prisma.orderItem.delete({
+            where: {
+                id: id
+            }
+        });
+
+        // Decrease the total price of the order by subtracting the price of the deleted product
+        await prisma.order.update({
+            where: {
+                id: orderItem.orderId // Use the orderId from the fetched order item
+            },
+            data: {
+                totalPrice: {
+                    decrement: orderItem.product.price // Decrement the total price by the price of the deleted product
+                }
+            }
+        });
+
+        res.status(200).json({ message: 'Order item deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting order item:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the order item.' });
+    }
+});
+
 
   app.get('/order-items/:id', async (req, res) => {
     try {
