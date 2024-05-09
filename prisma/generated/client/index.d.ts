@@ -8068,7 +8068,7 @@ export namespace Prisma {
 
   export type OrderCreateInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
@@ -8079,7 +8079,7 @@ export namespace Prisma {
 
   export type OrderUncheckedCreateInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     userId: string
@@ -8112,7 +8112,7 @@ export namespace Prisma {
 
   export type OrderCreateManyInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     userId: string
@@ -9674,7 +9674,7 @@ export namespace Prisma {
 
   export type OrderCreateWithoutOrderItemsInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
@@ -9684,7 +9684,7 @@ export namespace Prisma {
 
   export type OrderUncheckedCreateWithoutOrderItemsInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     userId: string
@@ -9884,7 +9884,7 @@ export namespace Prisma {
 
   export type OrderCreateWithoutUserInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
@@ -9894,7 +9894,7 @@ export namespace Prisma {
 
   export type OrderUncheckedCreateWithoutUserInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
@@ -10231,7 +10231,7 @@ export namespace Prisma {
 
   export type OrderCreateManyUserInput = {
     id?: string
-    totalPrice: Decimal | DecimalJsLike | number | string
+    totalPrice?: Decimal | DecimalJsLike | number | string
     token?: string
     status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string

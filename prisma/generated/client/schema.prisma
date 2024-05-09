@@ -40,7 +40,7 @@ enum TRANSACTION_STATUS {
 
 model Order {
   id               String             @id @default(uuid())
-  totalPrice       Decimal           
+  totalPrice       Decimal            @default(0)
   token            String             @default("no coupon")
   status           TRANSACTION_STATUS @default(PENDING)
   userId           String
