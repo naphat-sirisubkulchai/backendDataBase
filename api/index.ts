@@ -2,16 +2,13 @@ import { Prisma, PrismaClient,TRANSACTION_STATUS } from '../prisma/generated/cli
 import express from 'express'
 import cors from 'cors';
 
-// Allow requests from specific origins
 const app = express()
 const prisma = new PrismaClient()
-// Allow requests from specific origins
 const corsOptions = {
   origin: ['database-gatang-and-gan-g.vercel.app','http://localhost:3000'],
   credentials: true // Enable CORS credentials
 };
 
-// app.use(cors());
 app.use(cors(corsOptions));
 app.use(express.json())
 app.get("/", (req, res) => {
@@ -20,13 +17,13 @@ app.get("/", (req, res) => {
 //////////////////////// user/////////////////////////////////////
 app.get('/users', async (req, res) => {
   try {
-    // Query all users from the database using Prisma
+
     const users = await prisma.user.findMany();
 
-    // Send the users as a JSON response
+
     res.json(users);
   } catch (error) {
-    // Handle any errors that occur during the process
+
     console.error('Error retrieving users:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
@@ -34,7 +31,7 @@ app.get('/users', async (req, res) => {
 app.delete('/user/delete/:email', async (req, res) => {
     try {
       let { email } = req.params;
-      email = email.toLowerCase(); // Convert email to lowercase
+      email = email.toLowerCase(); 
       
       const deleteUser = await prisma.user.delete({
         where: { email },
@@ -50,7 +47,7 @@ app.get('/user/:email', async (req, res) => {
 try {
     const { email } = req.params;
 
-    // Use Prisma to query the database
+
     const user = await prisma.user.findUnique({
     where: { email},
     }); 
@@ -70,10 +67,10 @@ app.get('/products/:productId', async (req, res) => {
     try {
       const productId = req.params.productId;
   
-      // Use Prisma to query the database
+
       const product = await prisma.product.findUnique({
         where: { id: productId },
-        include: { Store: true, Category: true, orderItems: true }, // Include related entities
+        include: { Store: true, Category: true, orderItems: true }, 
       });
   
       if (!product) {
@@ -90,7 +87,7 @@ app.get('/products/:productId', async (req, res) => {
     try {
       const { name, slug, description, price, images, storeId, categoryId } = req.body;
   
-      // Use Prisma to create a new product
+
       const newProduct = await prisma.product.create({
         data: {
           name,
@@ -115,7 +112,7 @@ app.get('/products/:productId', async (req, res) => {
     const { name, slug, description, price, images, storeId, categoryId } = req.body;
   
     try {
-      // Check if the product exists
+
       const existingProduct = await prisma.product.findUnique({
         where: {
           id: id,
@@ -126,7 +123,7 @@ app.get('/products/:productId', async (req, res) => {
         return res.status(404).json({ error: 'Product not found' });
       }
   
-      // Update the product
+
       const updatedProduct = await prisma.product.update({
         where: {
           id: id,
@@ -158,7 +155,7 @@ app.get('/products/:productId', async (req, res) => {
             { name: { contains: searchString.toString(), mode: 'insensitive' } },
             { description: { contains: searchString.toString(), mode: 'insensitive' } },
             { slug: { contains: searchString.toString(), mode: 'insensitive' }},
-            // Add more fields for searching if needed
+            { Store: { name: { contains: searchString.toString(), mode: 'insensitive' }}}
           ],
         }
       : {};
@@ -191,7 +188,7 @@ app.get('/products/:productId', async (req, res) => {
     const { id } = req.params;
   
     try {
-      // Delete the product by ID
+
       const deletedProduct = await prisma.product.delete({
         where: {
           id: id,
@@ -207,7 +204,7 @@ app.get('/products/:productId', async (req, res) => {
 //////////////////////// order/////////////////////////////////////
 app.get('/orders/all', async (req, res) => {
     try {
-      // Use Prisma to fetch orders
+
       const orders = await prisma.order.findMany({
         include: {
           User: true,
@@ -222,13 +219,13 @@ app.get('/orders/all', async (req, res) => {
     }
   });
 
-  // Define a route to handle POST requests to create orders
+
   app.post('/orders/post', async (req, res) => {
     try {
-      // Extract data from request body
+
       const { totalPrice, token, status, userId, orderItems } = req.body;
   
-      // Create the order in the database
+
       const newOrder = await prisma.order.create({
         data: {
           totalPrice,
@@ -243,14 +240,13 @@ app.get('/orders/all', async (req, res) => {
           }
         },
         include: {
-          orderItems: true // Include associated order items in the response
+          orderItems: true 
         }
       });
   
-      // Respond with the newly created order
+
       res.json(newOrder);
     } catch (error) {
-      // Handle errors
       console.error('Error creating order:', error);
       res.status(500).json({ error: 'An error occurred while creating the order.' });
     }
@@ -258,63 +254,63 @@ app.get('/orders/all', async (req, res) => {
   
   app.get('/orders/:userId', async (req, res) => {
     try {
-      // Extract order ID from request parameters
+
       const { userId } = req.params;
   
-      // Fetch the order from the database using Prisma
+
       const order = await prisma.order.findMany({
         where: {
             userId: userId
         },
         include: {
-          orderItems: true // Include associated order items in the response
+          orderItems: true 
         }
       });
   
-      // Check if the order exists
+
       if (!order) {
         return res.status(404).json({ error: 'Order not found' });
       }
   
-      // Respond with the fetched order
+
       res.json(order);
     } catch (error) {
-      // Handle errors
+
       console.error('Error fetching order:', error);
       res.status(500).json({ error: 'An error occurred while fetching the order.' });
     }
   });
   app.put('/orders/:id/cancel', async (req, res) => {
     try {
-      // Extract order ID from request parameters
+
       const { id } = req.params;
   
-      // Fetch the order from the database
+
       const order = await prisma.order.findUnique({
         where: { id },
-        include: { orderItems: true } // Include associated order items
+        include: { orderItems: true }
       });
   
-      // Check if the order exists
+
       if (!order) {
         return res.status(404).json({ error: 'Order not found.' });
       }
   
-      // Check if the order is already canceled
+    
       if (order.status === 'CANCELED') {
         return res.status(400).json({ error: 'Order is already canceled.' });
       }
   
-      // Update the order status to 'CANCELED'
+  
       const updatedOrder = await prisma.order.update({
         where: { id },
         data: { status: 'CANCELED' }
       });
   
-      // Respond with the updated order
+      
       res.json(updatedOrder);
     } catch (error) {
-      // Handle errors
+     
       console.error('Error canceling order:', error);
       res.status(500).json({ error: 'An error occurred while canceling the order.' });
     }
@@ -327,7 +323,7 @@ app.get('/orders/all', async (req, res) => {
     try {
       const { orderId, productId, storeId } = req.body;
   
-      // Use Prisma to create a new OrderItem
+
       const newOrderItem = await prisma.orderItem.create({
         data: {
           orderId,
@@ -344,13 +340,13 @@ app.get('/orders/all', async (req, res) => {
   });
   app.put('/order-items/put/:id', async (req, res) => {
     try {
-      // Extract order item ID from request parameters
+
       const { id } = req.params;
   
-      // Extract data from request body
+
       const { orderId, productId, storeId } = req.body;
   
-      // Update the order item in the database
+
       const updatedOrderItem = await prisma.orderItem.update({
         where: {
           id
@@ -362,55 +358,45 @@ app.get('/orders/all', async (req, res) => {
         }
       });
   
-      // Respond with the updated order item
+
       res.json(updatedOrderItem);
     } catch (error) {
-      // Handle errors
       console.error('Error updating order item:', error);
       res.status(500).json({ error: 'An error occurred while updating the order item.' });
     }
   });
   app.delete('/order-items/delete/:id', async (req, res) => {
     try {
-      // Extract order item ID from request parameters
       const { id } = req.params;
   
-      // Delete the order item from the database
       await prisma.orderItem.delete({
         where: {
           id
         }
       });
   
-      // Respond with success message
       res.json({ message: 'Order item deleted successfully.' });
     } catch (error) {
-      // Handle errors
       console.error('Error deleting order item:', error);
       res.status(500).json({ error: 'An error occurred while deleting the order item.' });
     }
   });
   app.get('/order-items/:id', async (req, res) => {
     try {
-      // Extract order item ID from request parameters
       const { id } = req.params;
   
-      // Fetch the order item from the database using Prisma
       const orderItem = await prisma.orderItem.findUnique({
         where: {
           id
         }
       });
   
-      // Check if the order item exists
       if (!orderItem) {
         return res.status(404).json({ error: 'Order item not found' });
       }
   
-      // Respond with the fetched order item
       res.json(orderItem);
     } catch (error) {
-      // Handle errors
       console.error('Error fetching order item:', error);
       res.status(500).json({ error: 'An error occurred while fetching the order item.' });
     }
@@ -505,7 +491,6 @@ app.get('/categories/:slug/products', async (req, res) => {
     try {
       const { name, description, userId } = req.body;
   
-      // Ensure userId is a string
       if (typeof userId !== 'string') {
         return res.status(400).json({ error: 'Invalid userId.' });
       }
@@ -524,7 +509,6 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
   
-  // Get All Stores
   app.get('/stores/all', async (req, res) => {
     try {
       const stores = await prisma.store.findMany();
@@ -535,7 +519,6 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
   
-  // Get Store by ID
   app.get('/stores/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -556,7 +539,6 @@ app.get('/categories/:slug/products', async (req, res) => {
     try {
       const { userId } = req.params;
   
-      // Retrieve stores associated with the provided user ID
       const stores = await prisma.store.findMany({
         where: {
           userId
@@ -570,7 +552,6 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
   
-  // Update Store
   app.put('/stores/put/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -586,7 +567,6 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
   
-  // Delete Store
   app.delete('/stores/delete/:id', async (req, res) => {
     try {
       const { id } = req.params;
