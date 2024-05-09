@@ -95,17 +95,16 @@ app.get('/products/:productId', async (req, res) => {
     try {
       const storeId = req.params.storeId;
   
-
-      const product = await prisma.product.findUnique({
-        where: { id: storeId },
+      const products = await prisma.product.findMany({
+        where: { storeId: storeId },
         include: { Store: true, Category: true, orderItems: true }, 
       });
   
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+      if (!products || products.length === 0) {
+        return res.status(404).json({ error: 'Products not found for the specified store' });
       }
   
-      res.json(product);
+      res.json(products);
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ error: 'Internal server error' });
