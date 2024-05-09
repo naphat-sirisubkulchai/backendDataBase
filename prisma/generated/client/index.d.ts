@@ -301,7 +301,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 5.12.1
-   * Query Engine version: b9a39a7ee606c28e3455d0fd60e78c3ba82b1a2b
+   * Query Engine version: 473ed3124229e22d881cb7addf559799debae1ab
    */
   export type PrismaVersion = {
     client: string
@@ -8069,8 +8069,8 @@ export namespace Prisma {
   export type OrderCreateInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
     updatedAt?: Date | string
     User: UserCreateNestedOneWithoutOrdersInput
@@ -8080,8 +8080,8 @@ export namespace Prisma {
   export type OrderUncheckedCreateInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -8113,8 +8113,8 @@ export namespace Prisma {
   export type OrderCreateManyInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -9675,8 +9675,8 @@ export namespace Prisma {
   export type OrderCreateWithoutOrderItemsInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
     updatedAt?: Date | string
     User: UserCreateNestedOneWithoutOrdersInput
@@ -9685,8 +9685,8 @@ export namespace Prisma {
   export type OrderUncheckedCreateWithoutOrderItemsInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -9885,8 +9885,8 @@ export namespace Prisma {
   export type OrderCreateWithoutUserInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemCreateNestedManyWithoutOrderInput
@@ -9895,8 +9895,8 @@ export namespace Prisma {
   export type OrderUncheckedCreateWithoutUserInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
     updatedAt?: Date | string
     orderItems?: OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -10232,8 +10232,8 @@ export namespace Prisma {
   export type OrderCreateManyUserInput = {
     id?: string
     totalPrice: Decimal | DecimalJsLike | number | string
-    token: string
-    status: $Enums.TRANSACTION_STATUS
+    token?: string
+    status?: $Enums.TRANSACTION_STATUS
     createdAt?: Date | string
     updatedAt?: Date | string
   }

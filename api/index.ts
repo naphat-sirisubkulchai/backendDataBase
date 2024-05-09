@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient,TRANSACTION_STATUS } from '../prisma/generated/client'
+import { Prisma, PrismaClient ,TRANSACTION_STATUS } from '@prisma/client'
 import express from 'express'
 import cors from 'cors';
 
@@ -6,8 +6,9 @@ const app = express()
 const prisma = new PrismaClient()
 const corsOptions = {
   origin: ['database-gatang-and-gan-g.vercel.app','http://localhost:3000'],
-  credentials: true // Enable CORS credentials
+  credentials: true 
 };
+
 
 app.use(cors(corsOptions));
 app.use(express.json())
@@ -15,19 +16,7 @@ app.get("/", (req, res) => {
   res.send("Express on Vercel");
 });
 //////////////////////// user/////////////////////////////////////
-app.get('/users', async (req, res) => {
-  try {
 
-    const users = await prisma.user.findMany();
-
-
-    res.json(users);
-  } catch (error) {
-
-    console.error('Error retrieving users:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 app.delete('/user/delete/:email', async (req, res) => {
     try {
       let { email } = req.params;
@@ -47,7 +36,25 @@ app.get('/user/:email', async (req, res) => {
 try {
     const { email } = req.params;
 
+    
+    const user = await prisma.user.findUnique({
+    where: { email},
+    }); 
 
+    if (!user) {
+    return res.status(404).json({ error: 'user not found' });
+    }
+    res.json(user);
+} catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+}
+});
+app.get('/user/:email', async (req, res) => {
+try {
+    const { email } = req.params;
+
+    
     const user = await prisma.user.findUnique({
     where: { email},
     }); 
@@ -201,10 +208,21 @@ app.get('/products/:productId', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  app.delete('/products/delete/all', async (req, res) => {
+    try {
+    
+        await prisma.product.deleteMany({});
+
+        res.status(204).send(); 
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 //////////////////////// order/////////////////////////////////////
 app.get('/orders/all', async (req, res) => {
     try {
-
       const orders = await prisma.order.findMany({
         include: {
           User: true,
@@ -222,42 +240,31 @@ app.get('/orders/all', async (req, res) => {
 
   app.post('/orders/post', async (req, res) => {
     try {
+        const { userId } = req.body;
 
-      const { totalPrice, token, status, userId, orderItems } = req.body;
-  
+        const newOrder = await prisma.order.create({
+            data: {
+                userId,
+                orderItems: { create: [] } // Pass an empty array for order items
+            },
+            include: {
+                orderItems: true
+            }
+        });
 
-      const newOrder = await prisma.order.create({
-        data: {
-          totalPrice,
-          token,
-          status,
-          userId,
-          orderItems: {
-            create: orderItems.map((item: any) => ({
-              productId: item.productId,
-              storeId: item.storeId
-            }))
-          }
-        },
-        include: {
-          orderItems: true 
-        }
-      });
-  
-
-      res.json(newOrder);
+        res.json(newOrder);
     } catch (error) {
-      console.error('Error creating order:', error);
-      res.status(500).json({ error: 'An error occurred while creating the order.' });
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'An error occurred while creating the order.' });
     }
-  });
+});
   
   app.get('/orders/:userId', async (req, res) => {
     try {
-
+      
       const { userId } = req.params;
   
-
+      
       const order = await prisma.order.findMany({
         where: {
             userId: userId
@@ -267,41 +274,70 @@ app.get('/orders/all', async (req, res) => {
         }
       });
   
-
+      
       if (!order) {
         return res.status(404).json({ error: 'Order not found' });
       }
   
-
+      
       res.json(order);
     } catch (error) {
+    
+      console.error('Error fetching order:', error);
+      res.status(500).json({ error: 'An error occurred while fetching the order.' });
+    }
+  });
 
+  app.get('/orders/:id', async (req, res) => {
+    try {
+      
+      const { id } = req.params;
+  
+      
+      const order = await prisma.order.findMany({
+        where: {
+            id: id
+        },
+        include: {
+          orderItems: true 
+        }
+      });
+  
+      
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+  
+      
+      res.json(order);
+    } catch (error) {
+    
       console.error('Error fetching order:', error);
       res.status(500).json({ error: 'An error occurred while fetching the order.' });
     }
   });
   app.put('/orders/:id/cancel', async (req, res) => {
     try {
-
+      
       const { id } = req.params;
   
-
+      
       const order = await prisma.order.findUnique({
         where: { id },
-        include: { orderItems: true }
+        include: { orderItems: true } 
       });
   
-
+      
       if (!order) {
         return res.status(404).json({ error: 'Order not found.' });
       }
   
-    
+      
       if (order.status === 'CANCELED') {
         return res.status(400).json({ error: 'Order is already canceled.' });
       }
   
-  
+      
       const updatedOrder = await prisma.order.update({
         where: { id },
         data: { status: 'CANCELED' }
@@ -310,93 +346,166 @@ app.get('/orders/all', async (req, res) => {
       
       res.json(updatedOrder);
     } catch (error) {
-     
+
       console.error('Error canceling order:', error);
       res.status(500).json({ error: 'An error occurred while canceling the order.' });
     }
   });
+  app.delete('/orders/delete/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Delete the order by its ID
+        const deletedOrder = await prisma.order.delete({
+            where: {
+                id
+            }
+        });
+
+        // Check if the order was found and deleted
+        if (!deletedOrder) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        // Respond with the deleted order
+        res.json(deletedOrder);
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the order.' });
+    }
+});
+  
   
 
   //////////////////////// Order ITEM/////////////////////////////////////
   
+
   app.post('/order-items/post', async (req, res) => {
     try {
-      const { orderId, productId, storeId } = req.body;
-  
+        const { orderId, productId, storeId } = req.body;
 
-      const newOrderItem = await prisma.orderItem.create({
-        data: {
-          orderId,
-          productId,
-          storeId,
-        },
-      });
-  
-      res.status(201).json(newOrderItem);
-    } catch (error) {
-      console.error('Error creating order item:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
-  app.put('/order-items/put/:id', async (req, res) => {
-    try {
+        // Find the product associated with the order item
+        const product = await prisma.product.findUnique({
+            where: {
+                id: productId
+            }
+        });
 
-      const { id } = req.params;
-  
-
-      const { orderId, productId, storeId } = req.body;
-  
-
-      const updatedOrderItem = await prisma.orderItem.update({
-        where: {
-          id
-        },
-        data: {
-          orderId,
-          productId,
-          storeId
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found for the given productId.' });
         }
-      });
-  
 
-      res.json(updatedOrderItem);
+        // Get the price of the product
+        const price = product.price;
+
+        // Create the new order item
+        const newOrderItem = await prisma.orderItem.create({
+            data: {
+                orderId,
+                productId,
+                storeId
+            }
+        });
+
+        // Update the total price of the order by adding the price of the new order item
+        await prisma.order.update({
+            where: {
+                id: orderId
+            },
+            data: {
+                totalPrice: {
+                    increment: price
+                }
+            }
+        });
+
+        res.status(201).json(newOrderItem);
     } catch (error) {
-      console.error('Error updating order item:', error);
-      res.status(500).json({ error: 'An error occurred while updating the order item.' });
+        console.error('Error creating order item:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  });
+});
+
+
+
+
+
+
+  app.put('/order-items/put/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { productId, storeId } = req.body;
+
+        // Find the order item by orderId
+        const orderItem = await prisma.orderItem.findFirst({
+            where: {
+                orderId
+            }
+        });
+
+        if (!orderItem) {
+            return res.status(404).json({ error: 'Order item not found for the given orderId.' });
+        }
+
+        // Update the found order item with the new productId and storeId
+        const updatedOrderItem = await prisma.orderItem.update({
+            where: {
+                id: orderItem.id
+            },
+            data: {
+                productId,
+                storeId
+            }
+        });
+
+        res.json(updatedOrderItem);
+    } catch (error) {
+        console.error('Error updating order item:', error);
+        res.status(500).json({ error: 'An error occurred while updating the order item.' });
+    }
+});
+
   app.delete('/order-items/delete/:id', async (req, res) => {
     try {
+ 
       const { id } = req.params;
   
+
       await prisma.orderItem.delete({
         where: {
           id
         }
       });
   
+
       res.json({ message: 'Order item deleted successfully.' });
     } catch (error) {
+
       console.error('Error deleting order item:', error);
       res.status(500).json({ error: 'An error occurred while deleting the order item.' });
     }
   });
+
   app.get('/order-items/:id', async (req, res) => {
     try {
+
       const { id } = req.params;
-  
+
       const orderItem = await prisma.orderItem.findUnique({
         where: {
           id
         }
       });
   
+
       if (!orderItem) {
         return res.status(404).json({ error: 'Order item not found' });
       }
   
+
       res.json(orderItem);
     } catch (error) {
+
       console.error('Error fetching order item:', error);
       res.status(500).json({ error: 'An error occurred while fetching the order item.' });
     }
@@ -491,6 +600,7 @@ app.get('/categories/:slug/products', async (req, res) => {
     try {
       const { name, description, userId } = req.body;
   
+
       if (typeof userId !== 'string') {
         return res.status(400).json({ error: 'Invalid userId.' });
       }
@@ -509,6 +619,7 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
   
+  // Get All Stores
   app.get('/stores/all', async (req, res) => {
     try {
       const stores = await prisma.store.findMany();
@@ -519,7 +630,8 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
   
-  app.get('/stores/:id', async (req, res) => {
+  // Get Store by ID
+  app.get('/stores/id/:id', async (req, res) => {
     try {
       const { id } = req.params;
       const store = await prisma.store.findUnique({
@@ -535,10 +647,11 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
 
-  app.get('/stores/userID/:userId', async (req, res) => {
+  app.get('/stores/userid/:userId', async (req, res) => {
     try {
       const { userId } = req.params;
   
+
       const stores = await prisma.store.findMany({
         where: {
           userId
@@ -552,6 +665,7 @@ app.get('/categories/:slug/products', async (req, res) => {
     }
   });
   
+
   app.put('/stores/put/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -579,5 +693,4 @@ app.get('/categories/:slug/products', async (req, res) => {
       res.status(500).json({ error: 'An error occurred while deleting the store.' });
     }
   });
-app.listen(3000, () => console.log("Server ready on port 5050 or http://localhost:3000."));
-
+app.listen(5050, () => console.log("Server ready on port 5050 or http://localhost:5050."));
