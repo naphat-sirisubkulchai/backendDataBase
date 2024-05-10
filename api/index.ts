@@ -183,6 +183,7 @@ app.get('/products/:productId', async (req, res) => {
             { name: { contains: searchString.toString(), mode: 'insensitive' } },
             { description: { contains: searchString.toString(), mode: 'insensitive' } },
             { slug: { contains: searchString.toString(), mode: 'insensitive' }},
+            { categoryId: { contains: searchString.toString(), mode: 'insensitive' } },
             { Store: { name: { contains: searchString.toString(), mode: 'insensitive' }}}
           ],
         }
@@ -376,14 +377,12 @@ app.get('/orders/all', async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Delete the order by its ID
         const deletedOrder = await prisma.order.delete({
             where: {
                 id
             }
         });
 
-        // Check if the order was found and deleted
         if (!deletedOrder) {
             return res.status(404).json({ error: 'Order not found' });
         }
@@ -416,10 +415,8 @@ app.get('/orders/all', async (req, res) => {
             return res.status(404).json({ error: 'Product not found for the given productId.' });
         }
 
-        // Get the price of the product
         const price = product.price;
 
-        // Create the new order item
         const newOrderItem = await prisma.orderItem.create({
             data: {
                 orderId,
@@ -428,7 +425,6 @@ app.get('/orders/all', async (req, res) => {
             }
         });
 
-        // Update the total price of the order by adding the price of the new order item
         await prisma.order.update({
             where: {
                 id: orderId
@@ -486,32 +482,31 @@ app.get('/orders/all', async (req, res) => {
     }
 });
 
-  app.delete('/order-items/delete/:id', async (req, res) => {
-    try {
+  // app.delete('/order-items/delete/:id', async (req, res) => {
+  //   try {
  
-      const { id } = req.params;
+  //     const { id } = req.params;
   
 
-      await prisma.orderItem.delete({
-        where: {
-          id
-        }
-      });
+  //     await prisma.orderItem.delete({
+  //       where: {
+  //         id
+  //       }
+  //     });
   
 
-      res.json({ message: 'Order item deleted successfully.' });
-    } catch (error) {
+  //     res.json({ message: 'Order item deleted successfully.' });
+  //   } catch (error) {
 
-      console.error('Error deleting order item:', error);
-      res.status(500).json({ error: 'An error occurred while deleting the order item.' });
-    }
-  });
+  //     console.error('Error deleting order item:', error);
+  //     res.status(500).json({ error: 'An error occurred while deleting the order item.' });
+  //   }
+  // });
 
-  app.delete('/order-items/delete2/:id', async (req, res) => {
+  app.delete('/order-items/delete/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Find the order item to be deleted and include the associated product information
         const orderItem = await prisma.orderItem.findUnique({
             where: {
                 id: id
@@ -526,21 +521,20 @@ app.get('/orders/all', async (req, res) => {
             return res.status(404).json({ error: 'Order item not found' });
         }
 
-        // Delete the order item
         await prisma.orderItem.delete({
             where: {
                 id: id
             }
         });
 
-        // Decrease the total price of the order by subtracting the price of the deleted product
+        
         await prisma.order.update({
             where: {
-                id: orderItem.orderId // Use the orderId from the fetched order item
+                id: orderItem.orderId 
             },
             data: {
                 totalPrice: {
-                    decrement: orderItem.product.price // Decrement the total price by the price of the deleted product
+                    decrement: orderItem.product.price 
                 }
             }
         });
