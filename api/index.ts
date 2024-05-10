@@ -310,15 +310,15 @@ app.get('/orders/all', async (req, res) => {
     }
   });
 
-  app.get('/orders/:id', async (req, res) => {
+  app.get('/orders/:userId', async (req, res) => {
     try {
       
-      const { id } = req.params;
+      const { userId } = req.params;
   
       
       const order = await prisma.order.findMany({
         where: {
-            id: id
+          userId: userId
         },
         include: {
           orderItems: true 
@@ -338,6 +338,7 @@ app.get('/orders/all', async (req, res) => {
       res.status(500).json({ error: 'An error occurred while fetching the order.' });
     }
   });
+  
   app.put('/orders/:id/cancel', async (req, res) => {
     try {
       
