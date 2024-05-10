@@ -310,15 +310,15 @@ app.get('/orders/all', async (req, res) => {
     }
   });
 
-  app.get('/orders/:userId', async (req, res) => {
+  app.get('/orders/id/:id', async (req, res) => {
     try {
       
-      const { userId } = req.params;
+      const { id } = req.params;
   
       
       const order = await prisma.order.findMany({
         where: {
-          userId: userId
+            id: id
         },
         include: {
           orderItems: true 
